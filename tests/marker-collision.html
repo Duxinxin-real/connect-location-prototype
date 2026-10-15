@@ -1,0 +1,26 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Map marker collision check</title>
+<style>
+  html,body{margin:0;background:#111;color:#fff;font:14px system-ui}
+  iframe{display:block;width:390px;height:844px;border:0}
+</style>
+<iframe id="app" src="../index.html"></iframe>
+<output id="result">RUNNING</output>
+<script>
+  const frame = document.querySelector('#app');
+  const result = document.querySelector('#result');
+  const intersects = (a,b) => a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
+  frame.addEventListener('load', async () => {
+    const doc = frame.contentDocument;
+    let collisions = 0;
+    for (const person of ['me','kevin','mia']) {
+      doc.querySelector(`[data-person="${person}"]`).click();
+      await new Promise(resolve => setTimeout(resolve, 700));
+      const avatarRect = doc.querySelector('.map-avatar-icon').getBoundingClientRect();
+      collisions += [...doc.querySelectorAll('.map-photo-icon')].filter(photo => intersects(avatarRect, photo.getBoundingClientRect())).length;
+    }
+    result.textContent = collisions ? `FAIL marker collisions: ${collisions}` : 'PASS marker collisions: 0';
+    document.documentElement.dataset.testResult = collisions ? 'fail' : 'pass';
+  });
+</script>
